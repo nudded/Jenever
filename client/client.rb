@@ -14,6 +14,8 @@ class JeneverClient
       verify_user
     end
     send "#{user.upcase} #{number}" 
+    rescue
+      puts "wrong password"
   end
   
   def status(user="")
@@ -44,11 +46,14 @@ class JeneverClient
       return_value << socket.gets
     end
     return_value
+  rescue Errno::ECONNREFUSED
+    puts "connection refused"
   ensure
-    socket.close
+    socket.close if socket
   end
   
 end
+
 client = JeneverClient.new('localhost',2625)
 p client.buy("nudded", 2)
 p client.buy("nudded",-2)
