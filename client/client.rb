@@ -58,13 +58,5 @@ class JeneverClient
   end
   
 end
-temp = 2
-threads = []
-1.upto(400) do |i|
-  threads << Thread.new(JeneverClient.new('10.1.1.74',2725)) do |client|
-    2.times { client.drink "#{i}" ,temp }
-  end
-end
-threads.each {|th| th.join}
 
 
