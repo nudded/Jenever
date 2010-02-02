@@ -7,6 +7,7 @@ import Network
 import Jenever
 import System.Directory
 import Data.Binary
+import Control.DeepSeq
 
 restore :: IO Jenever
 restore = do exists <- doesFileExist "jenever.previous"
@@ -31,7 +32,7 @@ main = do copyFile "jenever.current" "jenever.previous"
             Nothing -> hPutStrLn handle "FAIL"
             (Just command) -> do jenever <- takeMVar mvar
                                  let (r, j) = applyCommand command jenever
-                                 putMVar mvar j
-                                 store j
+                                 deepseq j $ store j
                                  hPutStrLn handle r
+                                 putMVar mvar j
         hClose handle

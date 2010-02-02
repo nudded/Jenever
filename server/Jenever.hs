@@ -7,6 +7,7 @@ import Control.Monad (liftM)
 import Data.Char
 import Text.ParserCombinators.Parsec
 import Data.Digest.Pure.SHA
+import Control.DeepSeq
 
 data Jenever = Jenever { accounts :: M.Map String Int
                        , hashedPassword :: String 
@@ -30,7 +31,11 @@ instance Binary Jenever where
                               }
     put jenever = do put (M.toAscList $ accounts jenever)
                      put (hashedPassword jenever)
-                 
+
+instance NFData Jenever where
+    rnf jenever =         (M.fold deepseq () $ accounts jenever)
+                `deepseq` (hashedPassword jenever) 
+                `deepseq` ()
 
 data Command = Drink String Int
              | Clean String Int String
