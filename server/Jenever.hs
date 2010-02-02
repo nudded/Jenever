@@ -36,6 +36,7 @@ data Command = Drink String Int
              | Clean String Int String
              | Status String
              | Table
+             | Password String String
              deriving (Show, Eq)
 
 applyCommand :: Command -> Jenever -> (String, Jenever)
@@ -64,6 +65,12 @@ applyCommand Table jenever =
     let accounts' = M.toAscList (accounts jenever)
         showAccount userName quantity = userName ++ ": " ++ show quantity
     in (unlines $ map (uncurry showAccount) $ accounts', jenever)
+-- Password command: change password
+applyCommand (Password old new) jenever =
+    let hash = hashPassword old
+    in if hash == (hashedPassword jenever)
+        then ("OK", jenever {hashedPassword = hashPassword new})
+        else ("FAIL", jenever)
 
 parseCommand :: String -> Maybe Command
 parseCommand str = let result = runParser parseCommand' () "input" str
@@ -75,6 +82,7 @@ parseCommand' =   drink
               <|> clean
               <|> status
               <|> table
+              <|> password
   where
     drink = do command "drink"
                userName <- identifier
@@ -93,6 +101,11 @@ parseCommand' =   drink
 
     table = do command "table"
                return Table
+
+    password = do command "password"
+                  old <- identifier
+                  new <- identifier
+                  return $ Password old new
 
     command str = string str >> spaces
     identifier = do identifier' <- many1 alphaNum
