@@ -1,7 +1,7 @@
 module Main where
 
-import Control.Monad.State
 import Control.Concurrent
+import Control.Monad (forever)
 import Control.Applicative ((<$>))
 import System.IO
 import Network
