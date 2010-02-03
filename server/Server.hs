@@ -67,5 +67,8 @@ main :: IO ()
 main = do createDirectoryIfMissing True dumpDirectory
           user <- userID <$> getUserEntryForName "daemon"
           group <- groupID <$> getGroupEntryForName "daemon"
-          setOwnerAndGroup dumpDirectory user group
+          catch (setOwnerAndGroup dumpDirectory user group)
+                (\e -> warn)
           serviced runJenever
+  where
+    warn = putStrLn "Setting permissions failed: are you running as root?"
