@@ -1,0 +1,24 @@
+Name:                jeneverd
+Version:             0.1
+Synopsis:            Server to keep count of accounts.
+License:             BSD3
+License-file:        LICENSE
+Author:              Jasper Van der Jeugt
+Maintainer:          jaspervdj@gmail.com
+Build-Type:          Simple
+Cabal-Version:       >=1.2
+Executable jeneverd
+  Main-is:           Server.hs
+  Other-Modules:     Jenever
+  Build-Depends:     base >= 4 && < 5,
+                     deepseq >= 1.1,
+                     SHA >= 1.4,
+                     parsec >= 3,
+                     binary >= 0.5,
+                     bytestring >= 0.9,
+                     containers >= 0.2,
+                     unix >= 2,
+                     hdaemonize >= 0.2,
+                     filepath >= 1,
+                     directory >= 1,
+                     network >= 2.2
