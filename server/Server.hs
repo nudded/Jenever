@@ -64,11 +64,10 @@ runJenever _ = do -- Ensure the directories exist.
         hClose handle
 
 main :: IO ()
-main = do createDirectoryIfMissing True dumpDirectory
+main = do catch (createDirectoryIfMissing True dumpDirectory) warn
           user <- userID <$> getUserEntryForName "daemon"
           group <- groupID <$> getGroupEntryForName "daemon"
-          catch (setOwnerAndGroup dumpDirectory user group)
-                (\e -> warn)
+          catch (setOwnerAndGroup dumpDirectory user group) warn
           serviced runJenever
   where
-    warn = putStrLn "Setting permissions failed: are you running as root?"
+    warn _ = putStrLn "Setting permissions failed: are you running as root?"
