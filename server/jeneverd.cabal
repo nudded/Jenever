@@ -21,4 +21,5 @@ Executable jeneverd
                      hdaemonize >= 0.2,
                      filepath >= 1,
                      directory >= 1,
-                     network >= 2.2
+                     network >= 2.2,
+                     mtl >= 1.1

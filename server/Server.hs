@@ -2,6 +2,7 @@ module Main where
 
 import Control.Concurrent
 import Control.Monad (forever)
+import Control.Monad.State (runState)
 import Control.Applicative ((<$>))
 import System.IO
 import Network
@@ -41,10 +42,15 @@ store :: Jenever -> IO ()
 store jenever = encodeFile currentDump jenever
 
 runJenever :: Logger -> IO ()
-runJenever _ = do -- Ensure the directories exist.
+runJenever logger = do
+    logger "Starting jeneverd, listening on port 2625"
     socket <- listenOn (PortNumber 2625)
+
+    logger "Restoring previous state"
     jenever <- restore
     mvar <- newMVar jenever
+
+    logger "Waiting for incoming connections"
     forever (listen mvar socket)
   where
     listen mvar socket = do
@@ -53,18 +59,22 @@ runJenever _ = do -- Ensure the directories exist.
 
     respond mvar handle = do
         message <- hGetLine handle
+        logger $ "Received: " ++ message
         let parsed = parseCommand message
         case parsed of
             Nothing -> hPutStrLn handle "FAIL"
             (Just command) -> do jenever <- takeMVar mvar
-                                 let (r, j) = applyCommand command jenever
+                                 let state = applyCommand command
+                                     (r, j) = runState state jenever
                                  deepseq j $ store j
                                  hPutStrLn handle r
                                  putMVar mvar j
         hClose handle
 
 main :: IO ()
-main = do catch (createDirectoryIfMissing True dumpDirectory) warn
+main = do -- Try to create directories and make the "daemon" user owner, so our
+          -- jeneverd can access them after it dropped root privileges.
+          catch (createDirectoryIfMissing True dumpDirectory) warn
           user <- userID <$> getUserEntryForName "daemon"
           group <- groupID <$> getGroupEntryForName "daemon"
           catch (setOwnerAndGroup dumpDirectory user group) warn

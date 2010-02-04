@@ -1,11 +1,17 @@
-module Jenever where
+module Jenever
+    ( Jenever
+    , newJenever
+    , parseCommand
+    , applyCommand
+    ) where
 
 import qualified Data.Map as M
 import qualified Data.ByteString.Lazy as B
+import Control.Monad.State hiding (put, get)
 import Data.Binary
 import Control.Monad (liftM)
 import Data.Char
-import Text.ParserCombinators.Parsec
+import Text.ParserCombinators.Parsec hiding (State)
 import Data.Digest.Pure.SHA
 import Control.DeepSeq
 
@@ -27,8 +33,8 @@ instance Binary Jenever where
     get = do accounts' <- liftM M.fromAscList get
              hashedPassword' <- get
              return Jenever { accounts = accounts'
-                              , hashedPassword = hashedPassword'
-                              }
+                            , hashedPassword = hashedPassword'
+                            }
     put jenever = do put (M.toAscList $ accounts jenever)
                      put (hashedPassword jenever)
 
@@ -44,18 +50,21 @@ data Command = Drink String Int
              | Password String String
              deriving (Show, Eq)
 
-applyCommand :: Command -> Jenever -> (String, Jenever)
+applyCommand :: Command -> State Jenever String
+applyCommand = State . applyCommand'
+
+applyCommand' :: Command -> Jenever -> (String, Jenever)
 -- Drink command: add to account
-applyCommand (Drink userName quantity) jenever =
+applyCommand' (Drink userName quantity) jenever =
     let accounts' = M.insertWith (+) userName quantity (accounts jenever)
     in ("OK", jenever {accounts = accounts'})
 -- Status command: show user status.
-applyCommand (Status userName) jenever =
+applyCommand' (Status userName) jenever =
     let account = M.lookup userName (accounts jenever)
     in case account of Nothing -> ("FAIL", jenever)
                        (Just quantity) -> (show quantity, jenever)
 -- Clean command: clean drinks.
-applyCommand (Clean userName quantity password) jenever =
+applyCommand' (Clean userName quantity password) jenever =
     let hash = hashPassword password
         result = M.lookup userName (accounts jenever)
         accounts' original = let newQuantity = original - quantity
@@ -66,12 +75,12 @@ applyCommand (Clean userName quantity password) jenever =
             then ("OK", jenever {accounts = accounts' q})
             else ("FAIL", jenever)
 -- Table command: print all users
-applyCommand Table jenever =
+applyCommand' Table jenever =
     let accounts' = M.toAscList (accounts jenever)
         showAccount userName quantity = userName ++ ": " ++ show quantity
     in (unlines $ map (uncurry showAccount) accounts', jenever)
 -- Password command: change password
-applyCommand (Password old new) jenever =
+applyCommand' (Password old new) jenever =
     let hash = hashPassword old
     in if hash == hashedPassword jenever
         then ("OK", jenever {hashedPassword = hashPassword new})
