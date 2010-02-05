@@ -2,11 +2,8 @@ require "socket"
 
 class JeneverClient
   
-  # specify host,port in a hash 
-  # :host => "10.1.1.4" :port => 2625
   def initialize(host,port)
     @host, @port = host, port
-    @passhash = '119941962e7c5978b916c5058cc0ae05c697b9d8'
   end
   
   def drink(user,number)
