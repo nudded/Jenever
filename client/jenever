@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require "client"
+
+Server = 'localhost'
+
+if ARGV.size == 0
+  exit
+end
+
+client = JeneverClient.new(Server,2625)
+
+client.__send__(ARGV.shift.to_sym,*ARGV)
