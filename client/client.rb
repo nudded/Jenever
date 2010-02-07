@@ -15,7 +15,7 @@ class JeneverClient
     send "clean #{user} #{number} #{pass}"
   end
   
-  def change_password
+  def password
     old = get_pass("old pass: ")
     new = get_pass("new pass: ")
     send "password #{old} #{new}"

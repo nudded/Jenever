@@ -8,7 +8,7 @@ Options = <<EOS
   clean user amount
   table
   status user
-  password old new
+  password
 EOS
 
 if ARGV.size == 0
