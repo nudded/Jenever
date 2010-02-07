@@ -3,10 +3,22 @@ require "client"
 
 Server = 'localhost'
 
+Options = <<EOS
+  drink user amount
+  clean user amount
+  table
+  status user
+  password old new
+EOS
+
 if ARGV.size == 0
   exit
 end
 
 client = JeneverClient.new(Server,2625)
-
-client.__send__(ARGV.shift.to_sym,*ARGV)
+begin
+  client.__send__(ARGV.shift.to_sym,*ARGV)
+rescue NoMethodError
+  puts "available options:"
+  puts Options
+end
