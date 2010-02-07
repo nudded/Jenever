@@ -49,7 +49,7 @@ class JeneverClient
     end
     return_value
   rescue Errno::ECONNREFUSED
-    puts "connection refused"
+    puts "connection refused! Is the server running?"
   ensure
     socket.close if socket
   end
