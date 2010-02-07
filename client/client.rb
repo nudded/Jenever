@@ -47,7 +47,7 @@ class JeneverClient
     while ! socket.eof?
       return_value << socket.gets
     end
-    return_value
+    puts return_value if return_value =~ /fail/i
   rescue Errno::ECONNREFUSED
     puts "connection refused! Is the server running?"
   ensure
