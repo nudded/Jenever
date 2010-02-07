@@ -4,6 +4,7 @@ require "client"
 Server = 'localhost'
 
 Options = <<EOS
+OPTIONS:
   drink user amount
   clean user amount
   table
@@ -18,7 +19,7 @@ end
 client = JeneverClient.new(Server,2625)
 begin
   client.__send__(ARGV.shift.to_sym,*ARGV)
-rescue NoMethodError
-  puts "available options:"
+rescue NoMethodError,ArgumentError
+  puts "usage: #{$0} [OPTIONS]"
   puts Options
 end
